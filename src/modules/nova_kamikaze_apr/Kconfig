@@ -1,0 +1,5 @@
+menuconfig MODULES_NOVA_KAMIKAZE_APR
+	bool "nova_kamikaze_apr"
+	default y
+	---help---
+		Enable support for kamikaze approach

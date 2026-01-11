@@ -377,4 +377,5 @@ replay trystart
 if param compare -s NOVA_KMKZ 1
 then
 	nova_kamikaze start
+	nova_kamikaze_apr start
 fi
