@@ -293,7 +293,7 @@ PARAM_DEFINE_INT32(FW_BAT_SCALE_EN, 0);
  * @boolean
  * @group FW Rate Control
  */
-PARAM_DEFINE_INT32(FW_ARSP_SCALE_EN, 1);
+PARAM_DEFINE_INT32(FW_ARSP_SCALE_EN, 0);
 
 /**
 * Roll trim increment at minimum airspeed
