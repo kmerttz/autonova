@@ -1,0 +1,5 @@
+menuconfig MODULES_NOVA_TEST_CMD
+	bool "nova_test_cmd"
+	default n
+	---help---
+		Vehicle command tests to see the results.
