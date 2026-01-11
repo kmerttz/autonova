@@ -145,6 +145,7 @@ set(msg_files
 	NavigatorStatus.msg
 	NeuralControl.msg
 	NormalizedUnsignedSetpoint.msg
+	NovaKamikaze.msg
 	ObstacleDistance.msg
 	OffboardControlMode.msg
 	OnboardComputerStatus.msg
