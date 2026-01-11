@@ -87,9 +87,9 @@ void NovaKamikaze::CheckModeRegistration()
 		}
 	}
 
-	_kamikaze.timestamp = hrt_absolute_time();
-	_kamikaze.mode_id = _mode_id;
-	_kamikaze_pub.publish(_kamikaze);
+	_kamikaze_info.timestamp = hrt_absolute_time();
+	_kamikaze_info.mode_id = _mode_id;
+	_kamikaze_pub.publish(_kamikaze_info);
 }
 
 void NovaKamikaze::PopulateAttitudeSetpoint(int8_t kamik_state)
@@ -204,10 +204,22 @@ void NovaKamikaze::Run()
 	perf_begin(_loop_perf);
 	perf_count(_loop_interval_perf);
 
-	if (_parameter_update_sub.updated()) {
+	if (_parameter_update_sub.updated() || !_got_any_param) {
+		if (!_got_any_param) {
+			_got_any_param = true;
+		}
 		parameter_update_s param_update;
 		_parameter_update_sub.copy(&param_update);
 		updateParams();
+		if (_param_dive_ang.get() != _dive_ang) {
+			_dive_ang = _param_dive_ang.get();
+			int dive_alt = _param_dive_alt.get();
+
+			_kamikaze_info.timestamp = hrt_absolute_time();
+			_kamikaze_info.dive_ang = _dive_ang;
+			_kamikaze_info.dive_alt = dive_alt;
+			_kamikaze_pub.publish(_kamikaze_info);
+		}
 	}
 
 	if (!_sent_mode_registration) {

@@ -87,10 +87,14 @@ private:
 	perf_counter_t	_loop_perf{perf_alloc(PC_ELAPSED, MODULE_NAME": cycle")};
 	perf_counter_t	_loop_interval_perf{perf_alloc(PC_INTERVAL, MODULE_NAME": interval")};
 
+	bool  _got_any_param{false};
+
 	bool _sent_mode_registration{false};
 	uint8_t _mode_request_id{200}; //Random value
 	int8_t _arming_check_id{-1};
 	int8_t _mode_id{-1};
+
+	int _dive_ang{0};
 
 	int8_t _dive{0};
 	int8_t _level{1};
@@ -104,7 +108,7 @@ private:
 	vehicle_attitude_setpoint_s	_attitude_setpoint{};
 	vehicle_local_position_s	_position{};
 	vehicle_attitude_s		_attitude{};
-	nova_kamikaze_s                      _kamikaze{};
+	nova_kamikaze_s                 _kamikaze_info{};
 
 	// Parameters
 	DEFINE_PARAMETERS(
