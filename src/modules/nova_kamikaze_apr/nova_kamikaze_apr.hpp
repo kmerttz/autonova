@@ -52,6 +52,7 @@ private:
 	void calculate_qr_target_coordinates(int distance_to_target);
 	void check_route_completion();
 	void set_mode_kamikaze();
+	void set_mode_hold();
 
 	// Publications
 	uORB::Publication<vehicle_command_s> _vehicle_cmd_pub{ORB_ID(vehicle_command)};
@@ -62,6 +63,7 @@ private:
 	uORB::Subscription	             _local_position_sub{ORB_ID(vehicle_local_position)};
 	uORB::Subscription	             _kamikaze_sub{ORB_ID(nova_kamikaze)};
 	uORB::Subscription	             _vehicle_status_sub{ORB_ID(vehicle_status)};
+	uORB::Subscription	             _vehicle_command_sub{ORB_ID(vehicle_command)};
 
 
 	enum class ApproachState {
@@ -69,7 +71,8 @@ private:
 		APPROACHING,
 		ORBITING,
 		ENROUTE,
-		COMPLETED
+		COMPLETED,
+		ABORT
 	};
 
 	struct qr_location_s {
@@ -93,6 +96,8 @@ private:
 	};
 
 	bool  _got_any_param{false};
+	bool  _kamikaze_active{false};
+
 	int   _apr_alt{};
 	int   _orb_rad{};
 	int   _orb_side{};
@@ -110,6 +115,7 @@ private:
 	vehicle_local_position_s    _local_pos{};
 	vehicle_status_s 	    _vehicle_status{};
 	nova_kamikaze_s    	    _kamikaze_info{};
+	vehicle_command_s	    _vehicle_command{};
 
 	qr_location_s		_qr_loc{};
 	qr_target_location_s 	_qr_target_loc{};

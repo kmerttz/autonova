@@ -132,23 +132,42 @@ void NovaKamikazeApr::set_mode_kamikaze()
 		_kamikaze_sub.copy(&_kamikaze_info);
 	}
 
-        vehicle_command_s cmd{};
-        cmd.timestamp = hrt_absolute_time();
-        cmd.command = vehicle_command_s::VEHICLE_CMD_DO_SET_MODE;
-        cmd.param1 = 1;
-	cmd.param2 = 4; // MAIN AUTO ID
-	cmd.param3 = _kamikaze_info.mode_id - 12; // SUB KAMIKAZE ID
+        _vehicle_command.timestamp = hrt_absolute_time();
+        _vehicle_command.command = vehicle_command_s::VEHICLE_CMD_DO_SET_MODE;
+        _vehicle_command.param1 = 1;
+	_vehicle_command.param2 = 4; // MAIN AUTO ID
+	_vehicle_command.param3 = _kamikaze_info.mode_id - 12; // SUB KAMIKAZE ID
 
-        cmd.target_system = _vehicle_status.system_id;
-        cmd.target_component = _vehicle_status.component_id;
+        _vehicle_command.target_system = _vehicle_status.system_id;
+        _vehicle_command.target_component = _vehicle_status.component_id;
 
-        cmd.source_system = _vehicle_status.system_id;
-        cmd.source_component = _vehicle_status.component_id;
+        _vehicle_command.source_system = _vehicle_status.system_id;
+        _vehicle_command.source_component = _vehicle_status.component_id;
 
-        cmd.confirmation = false;
-        cmd.from_external = false;
+        _vehicle_command.confirmation = false;
+        _vehicle_command.from_external = false;
 
-        _vehicle_cmd_pub.publish(cmd);
+        _vehicle_cmd_pub.publish(_vehicle_command);
+}
+
+void NovaKamikazeApr::set_mode_hold()
+{
+        _vehicle_command.timestamp = hrt_absolute_time();
+        _vehicle_command.command = vehicle_command_s::VEHICLE_CMD_DO_SET_MODE;
+        _vehicle_command.param1 = 1;
+	_vehicle_command.param2 = 4; // MAIN AUTO ID
+	_vehicle_command.param3 = 3; // SUB HOLD ID
+
+        _vehicle_command.target_system = _vehicle_status.system_id;
+        _vehicle_command.target_component = _vehicle_status.component_id;
+
+        _vehicle_command.source_system = _vehicle_status.system_id;
+        _vehicle_command.source_component = _vehicle_status.component_id;
+
+        _vehicle_command.confirmation = false;
+        _vehicle_command.from_external = false;
+
+        _vehicle_cmd_pub.publish(_vehicle_command);
 }
 
 void NovaKamikazeApr::Run()
@@ -166,7 +185,6 @@ void NovaKamikazeApr::Run()
 
 		if (!_got_any_param) {
 			_got_any_param = true;
-			_vehicle_status_sub.update(&_vehicle_status);
 		}
 
 		parameter_update_s param_update;
@@ -183,55 +201,72 @@ void NovaKamikazeApr::Run()
 		_dive_ofs    = _param_kmkz_dive_ofs.get();
 	}
 
-	if (_param_kmkz_apr_start.get() == 0) {
-		_orbit_started = false;
-		_half_lap_completed = false;
-		_first_lap_completed = false;
-		_route_completed = false;
-		_approach_status = ApproachState::IDLE;
-		return;
+	_vehicle_command_sub.update(&_vehicle_command);
+	if (_vehicle_command.command == vehicle_command_s::VEHICLE_CMD_DO_KMKZ) {
+		int condition = roundf(_vehicle_command.param1);
+		if (condition == 1) {
+			_kamikaze_active = true;
+			_approach_status = ApproachState::IDLE;
+		} else {
+			_approach_status = ApproachState::ABORT;
+		}
 	}
 
-	switch (_approach_status) {
+	if (_kamikaze_active) {
+		switch (_approach_status) {
 
-		case ApproachState::IDLE:
-			calculate_orbit_center();
-			orbit(_orb_rad, _orb_loc.lat, _orb_loc.lon, _apr_alt);
-			_approach_status = ApproachState::APPROACHING;
-			break;
+			case ApproachState::IDLE:
+				calculate_orbit_center();
+				orbit(_orb_rad, _orb_loc.lat, _orb_loc.lon, _apr_alt);
+				_approach_status = ApproachState::APPROACHING;
+				break;
 
-		case ApproachState::APPROACHING:
-			check_orbit_progress();
-			if (_orbit_started) {
-				_approach_status = ApproachState::ORBITING;
-			}
-			break;
-
-		case ApproachState::ORBITING:
-			check_orbit_progress();
-			if (_first_lap_completed) {
-				_local_position_sub.update(&_local_pos);
-				if (fabsf(_heading_apr2qr - _local_pos.heading) < 0.05f) {
-					calculate_qr_target_coordinates(100);
-					orbit(0.2f, _qr_target_loc.lat, _qr_target_loc.lon, _apr_alt);
-					_approach_status = ApproachState::ENROUTE;
+			case ApproachState::APPROACHING:
+				check_orbit_progress();
+				if (_orbit_started) {
+					_approach_status = ApproachState::ORBITING;
 				}
-			}
-			break;
+				break;
 
-		case ApproachState::ENROUTE:
-			check_route_completion();
-			if (_route_completed) {
-				set_mode_kamikaze();
-				_param_kmkz_apr_start.set(0);
-				_approach_status = ApproachState::COMPLETED;
-			}
-			break;
+			case ApproachState::ORBITING:
+				check_orbit_progress();
+				if (_first_lap_completed) {
+					_local_position_sub.update(&_local_pos);
+					if (fabsf(_heading_apr2qr - _local_pos.heading) < 0.05f) {
+						calculate_qr_target_coordinates(100);
+						orbit(0.2f, _qr_target_loc.lat, _qr_target_loc.lon, _apr_alt);
+						_approach_status = ApproachState::ENROUTE;
+					}
+				}
+				break;
 
-		case ApproachState::COMPLETED:
-			break;
+			case ApproachState::ENROUTE:
+				check_route_completion();
+				if (_route_completed) {
+					set_mode_kamikaze();
+					_param_kmkz_apr_start.set(0);
+					_approach_status = ApproachState::COMPLETED;
+				}
+				break;
+
+			case ApproachState::COMPLETED:
+				_orbit_started = false;
+				_half_lap_completed = false;
+				_first_lap_completed = false;
+				_route_completed = false;
+				_kamikaze_active = false;
+				break;
+
+			case ApproachState::ABORT:
+				set_mode_hold();
+				_orbit_started = false;
+				_half_lap_completed = false;
+				_first_lap_completed = false;
+				_route_completed = false;
+				_kamikaze_active = false;
+				break;
+			}
 	}
-
 	perf_end(_loop_perf);
 }
 
