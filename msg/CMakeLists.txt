@@ -207,6 +207,7 @@ set(msg_files
 	SensorAirflow.msg
 	SystemPower.msg
 	TakeoffStatus.msg
+	TargetUavInfo.msg
 	TaskStackInfo.msg
 	TecsStatus.msg
 	TelemetryStatus.msg
