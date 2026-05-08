@@ -1,0 +1,5 @@
+menuconfig MODULES_NOVA_KAMIKAZE
+	bool "nova_kamikaze"
+	default y
+	---help---
+		Enable support for kamikaze
