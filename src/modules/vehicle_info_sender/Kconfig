@@ -1,0 +1,5 @@
+menuconfig MODULES_VEHICLE_INFO_SENDER
+	bool "vehicle_info_sender"
+	default y
+	---help---
+		Enable support for vehicle_info_sender
