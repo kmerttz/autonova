@@ -152,6 +152,7 @@
 # include "streams/SCALED_PRESSURE3.hpp"
 # include "streams/UAVIONIX_ADSB_OUT_CFG.hpp"
 # include "streams/UAVIONIX_ADSB_OUT_DYNAMIC.hpp"
+# include "streams/DATA_PACK.hpp"
 #endif // !CONSTRAINED_FLASH
 
 // ensure PX4 rotation enum and MAV_SENSOR_ROTATION align
@@ -510,6 +511,9 @@ static const StreamListItem streams_list[] = {
 #if defined(CURRENT_MODE_HPP)
 	create_stream_list_item<MavlinkStreamCurrentMode>(),
 #endif // CURRENT_MODE_HPP
+#if defined(DATA_PACK_HPP)
+	create_stream_list_item<MavlinkStreamDataPack>(),
+#endif // DATA_PACK_HPP
 };
 
 const char *get_stream_name(const uint16_t msg_id)
