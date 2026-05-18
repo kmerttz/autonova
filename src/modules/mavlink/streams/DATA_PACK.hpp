@@ -37,9 +37,9 @@ private:
             msg.iha_boylam = vehicle_info.longitude;
             msg.iha_irtifa = vehicle_info.altitude;
 
-            msg.iha_yatis   = vehicle_info.roll;
             msg.iha_dikilme = vehicle_info.pitch;
             msg.iha_yonelme = vehicle_info.heading;
+	    msg.iha_yatis   = vehicle_info.roll;
 
             msg.iha_hiz = vehicle_info.velocity;
 
