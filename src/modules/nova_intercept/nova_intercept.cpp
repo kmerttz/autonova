@@ -56,6 +56,7 @@ void NovaIntercept::ConfigureInterceptMode(int8_t mode_id)
 	vehicle_control_mode.flag_control_attitude_enabled = true;
 	vehicle_control_mode.flag_control_rates_enabled = true;
 	vehicle_control_mode.flag_control_allocation_enabled = true;
+	vehicle_control_mode.flag_control_offboard_enabled = true;
 
 	vehicle_control_mode.flag_control_termination_enabled = false;
 
@@ -141,10 +142,10 @@ void NovaIntercept::PopulatePositionSetpoint()
 		_sensor_gps_sub.update(&_sensor_gps);
 	}
 
-	Vector3f target_est_delta_position_ned = _target_uav_predictor.estimateTargetPosDelta(_sensor_gps.time_utc_usec);
-	Vector3f target_position_est_ned = _target_last_position_ned + target_est_delta_position_ned;
+	// Vector3f target_est_delta_position_ned = _target_uav_predictor.estimateTargetPosDelta(_sensor_gps.time_utc_usec);
+	// Vector3f target_position_est_ned = _target_last_position_ned + target_est_delta_position_ned;
 
-	Vector3f position_setpoint = _intercept_guidance.calculateSetpoint(_vehicle_position_ned, target_position_est_ned, _lag_distance);
+	Vector3f position_setpoint = _intercept_guidance.calculateSetpoint(_vehicle_position_ned, _target_last_position_ned, _lag_distance);
 
 
 	_trajectory_setpoint.timestamp = hrt_absolute_time();
@@ -164,7 +165,7 @@ void NovaIntercept::PopulatePositionSetpoint()
 	_trajectory_setpoint.jerk[0] = NAN;
 	_trajectory_setpoint.jerk[1] = NAN;
 	_trajectory_setpoint.jerk[2] = NAN;
-	
+
 	_trajectory_setpoint.yaw = NAN;
 	_trajectory_setpoint.yawspeed = NAN;
 
