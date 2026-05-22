@@ -138,14 +138,22 @@ void NovaIntercept::PopulatePositionSetpoint()
 							target_last_seen);
 	}
 
+#ifdef __PX4_NUTTX
 	if (_sensor_gps_sub.updated()) {
 		_sensor_gps_sub.update(&_sensor_gps);
 	}
 
-	// Vector3f target_est_delta_position_ned = _target_uav_predictor.estimateTargetPosDelta(_sensor_gps.time_utc_usec);
-	// Vector3f target_position_est_ned = _target_last_position_ned + target_est_delta_position_ned;
+	Vector3f target_est_delta_position_ned = _target_uav_predictor.estimateTargetPosDelta(_sensor_gps.time_utc_usec);
+#else
+	auto timenow = std::chrono::system_clock::now();
+	auto timenow_usec = std::chrono::duration_cast<std::chrono::microseconds>(timenow.time_since_epoch()).count();
+	
+	Vector3f target_est_delta_position_ned = _target_uav_predictor.estimateTargetPosDelta(timenow_usec);
+#endif
 
-	Vector3f position_setpoint = _intercept_guidance.calculateSetpoint(_vehicle_position_ned, _target_last_position_ned, _lag_distance);
+	Vector3f target_position_est_ned = _target_last_position_ned + target_est_delta_position_ned;
+
+	Vector3f position_setpoint = _intercept_guidance.calculateSetpoint(_vehicle_position_ned, target_position_est_ned, _lag_distance);
 
 
 	_trajectory_setpoint.timestamp = hrt_absolute_time();

@@ -23,7 +23,11 @@
 //#include <uORB/topics/vehicle_local_position_setpoint.h>
 #include <uORB/topics/trajectory_setpoint.h>
 #include <uORB/topics/target_uav_info.h>
+#ifdef __PX4_NUTTX
 #include <uORB/topics/sensor_gps.h>
+#else
+#include <chrono>
+#endif
 
 #include <uORB/topics/register_ext_component_reply.h>
 #include <uORB/topics/arming_check_request.h>
@@ -86,7 +90,9 @@ private:
 
 	uORB::Subscription 			_vehicle_local_position_sub{ORB_ID(vehicle_local_position)};
 	uORB::Subscription 			_target_uav_info_sub{ORB_ID(target_uav_info)};
+#ifdef __PX4_NUTTX
 	uORB::Subscription 			_sensor_gps_sub{ORB_ID(sensor_gps)};
+#endif
 
 	// Performance (perf) counters
 	perf_counter_t	_loop_perf{perf_alloc(PC_ELAPSED, MODULE_NAME": cycle")};
@@ -110,7 +116,9 @@ private:
 	//vehicle_local_position_setpoint_s	_vehicle_local_position_setpoint{};
 	trajectory_setpoint_s			_trajectory_setpoint{};
 	target_uav_info_s			_target_uav_info{};
+#ifdef __PX4_NUTTX
 	sensor_gps_s				_sensor_gps{};
+#endif
 
 	// Parameters
 	DEFINE_PARAMETERS(
