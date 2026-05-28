@@ -573,8 +573,8 @@
                             "description": "Vtol Takeoff"
                         },
                         "16": {
-                            "name": "external1",
-                            "description": "External 1"
+                            "name": "auto_dogfight",
+                            "description": "Dogfight"
                         },
                         "17": {
                             "name": "external2",

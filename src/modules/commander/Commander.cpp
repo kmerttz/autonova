@@ -413,9 +413,9 @@ int Commander::custom_command(int argc, char *argv[])
 				send_vehicle_command(vehicle_command_s::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_AUTO,
 						     PX4_CUSTOM_SUB_MODE_AUTO_PRECLAND);
 
-			} else if (!strcmp(argv[1], "ext1")) {
+			} else if (!strcmp(argv[1], "auto:dogfight")) {
 				send_vehicle_command(vehicle_command_s::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_AUTO,
-						     PX4_CUSTOM_SUB_MODE_EXTERNAL1);
+						     PX4_CUSTOM_SUB_MODE_AUTO_DOGFIGHT);
 
 			} else {
 				PX4_ERR("argument %s unsupported.", argv[1]);
@@ -844,8 +844,12 @@ Commander::handle_command(const vehicle_command_s &cmd)
 							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_AUTO_PRECLAND;
 							break;
 
-						case PX4_CUSTOM_SUB_MODE_EXTERNAL1...PX4_CUSTOM_SUB_MODE_EXTERNAL8:
-							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_EXTERNAL1 + (custom_sub_mode - PX4_CUSTOM_SUB_MODE_EXTERNAL1);
+						case PX4_CUSTOM_SUB_MODE_AUTO_DOGFIGHT:
+							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_AUTO_DOGFIGHT;
+							break;
+
+						case PX4_CUSTOM_SUB_MODE_EXTERNAL2...PX4_CUSTOM_SUB_MODE_EXTERNAL8:
+							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_EXTERNAL2 + (custom_sub_mode - PX4_CUSTOM_SUB_MODE_EXTERNAL2);
 							break;
 
 						default:

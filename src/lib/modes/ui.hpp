@@ -61,7 +61,8 @@ static inline uint32_t getValidNavStates()
 	       (1u << vehicle_status_s::NAVIGATION_STATE_AUTO_FOLLOW_TARGET) |
 	       (1u << vehicle_status_s::NAVIGATION_STATE_AUTO_PRECLAND) |
 	       (1u << vehicle_status_s::NAVIGATION_STATE_ORBIT) |
-	       (1u << vehicle_status_s::NAVIGATION_STATE_AUTO_VTOL_TAKEOFF);
+	       (1u << vehicle_status_s::NAVIGATION_STATE_AUTO_VTOL_TAKEOFF) |
+	       (1u << vehicle_status_s::NAVIGATION_STATE_AUTO_DOGFIGHT);
 
 	static_assert(vehicle_status_s::NAVIGATION_STATE_MAX  == 31, "update valid nav states");
 }
@@ -90,7 +91,7 @@ const char *const nav_state_names[vehicle_status_s::NAVIGATION_STATE_MAX] = {
 	"Precision Landing",
 	"Orbit",
 	"VTOL Takeoff",
-	"External 1",
+	"DOGFIGHT",
 	"External 2",
 	"External 3",
 	"External 4",
@@ -109,8 +110,6 @@ static inline bool isAdvanced(uint8_t nav_state)
 	case vehicle_status_s::NAVIGATION_STATE_ALTCTL: return false;
 
 	case vehicle_status_s::NAVIGATION_STATE_POSCTL: return false;
-
-	case vehicle_status_s::NAVIGATION_STATE_EXTERNAL1: return false;
 
 	case vehicle_status_s::NAVIGATION_STATE_EXTERNAL2: return false;
 

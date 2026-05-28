@@ -63,7 +63,7 @@ private:
 	/* Only delay if the transmit of one mode takes at least 1ms, this avoids a lot of fast delay calls */
 	static constexpr uint32_t MIN_DELAY_THRESHOLD = 1000;
 	static constexpr int MAX_NUM_EXTERNAL_MODES = vehicle_status_s::NAVIGATION_STATE_EXTERNAL8 -
-			vehicle_status_s::NAVIGATION_STATE_EXTERNAL1 + 1;
+			vehicle_status_s::NAVIGATION_STATE_EXTERNAL2 + 1;
 
 	explicit MavlinkStreamAvailableModes(Mavlink *mavlink) : MavlinkStream(mavlink) {}
 
@@ -106,9 +106,9 @@ private:
 			static_assert(sizeof(available_modes.mode_name) >= sizeof(ExternalModeName::name), "mode name too short");
 
 			// Is it an external mode?
-			unsigned external_mode_index = nav_state - vehicle_status_s::NAVIGATION_STATE_EXTERNAL1;
+			unsigned external_mode_index = nav_state - vehicle_status_s::NAVIGATION_STATE_EXTERNAL2;
 
-			if (nav_state >= vehicle_status_s::NAVIGATION_STATE_EXTERNAL1 && external_mode_index < MAX_NUM_EXTERNAL_MODES) {
+			if (nav_state >= vehicle_status_s::NAVIGATION_STATE_EXTERNAL2 && external_mode_index < MAX_NUM_EXTERNAL_MODES) {
 				if (cannot_be_selected) {
 					// If not selectable, it's not registered
 					strcpy(available_modes.mode_name, "(Mode not available)");
@@ -201,7 +201,7 @@ private:
 					_external_mode_names = new ExternalModeName[MAX_NUM_EXTERNAL_MODES];
 				}
 
-				unsigned mode_index = reply.mode_id - vehicle_status_s::NAVIGATION_STATE_EXTERNAL1;
+				unsigned mode_index = reply.mode_id - vehicle_status_s::NAVIGATION_STATE_EXTERNAL2;
 
 				if (_external_mode_names && mode_index < MAX_NUM_EXTERNAL_MODES) {
 					memcpy(_external_mode_names[mode_index].name, reply.name, sizeof(ExternalModeName::name));
