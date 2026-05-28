@@ -136,6 +136,9 @@ void
 MavlinkReceiver::handle_message(mavlink_message_t *msg)
 {
 	switch (msg->msgid) {
+	case MAVLINK_MSG_ID_TARGET_VEHICLE_DATA:
+		handle_message_target_vehicle_data(msg);
+		break;
 	case MAVLINK_MSG_ID_COMMAND_LONG:
 		handle_message_command_long(msg);
 		break;
@@ -2892,6 +2895,27 @@ void MavlinkReceiver::handle_message_statustext(mavlink_message_t *msg)
 			_log_message_pub.publish(_mavlink_statustext_handler.log_message());
 		}
 	}
+}
+
+void MavlinkReceiver::handle_message_target_vehicle_data(mavlink_message_t *msg)
+{
+	mavlink_target_vehicle_data_t arr_data;
+	mavlink_msg_target_vehicle_data_decode(msg, &arr_data);
+
+	target_uav_info_s target_data{};
+
+	target_data.timestamp = hrt_absolute_time();
+	target_data.team_id = arr_data.takim_numarasi;
+	target_data.latitude = arr_data.iha_enlem;
+	target_data.longitude = arr_data.iha_boylam;
+	target_data.altitude = arr_data.iha_irtifa;
+	target_data.pitch = arr_data.iha_dikilme;
+	target_data.heading = arr_data.iha_yonelme;
+	target_data.roll = arr_data.iha_yatis;
+	target_data.velocity = arr_data.iha_hiz;
+	target_data.time_utc_usec = arr_data.zaman;
+
+	_target_uav_info_pub.publish(target_data);
 }
 
 void MavlinkReceiver::CheckHeartbeats(const hrt_abstime &t, bool force)

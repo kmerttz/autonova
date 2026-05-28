@@ -1,0 +1,5 @@
+menuconfig MODULES_NOVA_INTERCEPT
+	bool "nova_intercept"
+	default y
+	---help---
+		Enable support for intercept

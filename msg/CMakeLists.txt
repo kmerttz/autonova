@@ -207,6 +207,7 @@ set(msg_files
 	SensorAirflow.msg
 	SystemPower.msg
 	TakeoffStatus.msg
+	TargetUavInfo.msg
 	TaskStackInfo.msg
 	TecsStatus.msg
 	TelemetryStatus.msg
@@ -225,6 +226,7 @@ set(msg_files
 	VehicleConstraints.msg
 	VehicleImu.msg
 	VehicleImuStatus.msg
+	VehicleInfo.msg
 	VehicleLocalPositionSetpoint.msg
 	VehicleMagnetometer.msg
 	VehicleOpticalFlow.msg

@@ -1,0 +1,5 @@
+px4_add_library(target_uav_predictor
+	target_uav_predictor.cpp
+	target_uav_predictor.hpp
+)
+target_link_libraries(target_uav_predictor)
