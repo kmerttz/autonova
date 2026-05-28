@@ -31,31 +31,58 @@
  *
  ****************************************************************************/
 
-/**
- * @file FlightTaskDescend.hpp
- */
-
 #pragma once
 
-#include <uORB/topics/target_uav_info.h>
-#include <uORB/topics/vehicle_global_position.h>
-
-// #include <lib/stick_yaw/StickYaw.hpp> // Ömerin kütüphane
-// #include <lib/stick_yaw/StickYaw.hpp> // Alperenin kütüphane
 #include "FlightTask.hpp"
+
+#include <lib/intercept_guidance/intercept_guidance.hpp>
+#include <lib/target_uav_predictor/target_uav_predictor.hpp>
+#include <lib/geo/geo.h>
+
+#include <uORB/topics/vehicle_local_position.h>
+#include <uORB/topics/sensor_gps.h>
+#include <uORB/topics/target_uav_info.h>
+
+
+using namespace matrix;
 
 class FlightTaskIntercept : public FlightTask
 {
 public:
+
 	FlightTaskIntercept() = default;
 	virtual ~FlightTaskIntercept() = default;
 
-	bool update() override;
 	bool activate(const trajectory_setpoint_s &last_setpoint) override;
+	bool update() override;
 
 private:
 
-	DEFINE_PARAMETERS_CUSTOM_PARENT(FlightTask,
-					(ParamInt<px4::params::INTRCPT_LAG_DIST>) _param_intrcpt_lag_dist
-				       )
+	uORB::Subscription		_vehicle_local_position_sub{ORB_ID(vehicle_local_position)};
+	vehicle_local_position_s	_vehicle_local_position{};
+
+	uORB::Subscription		_sensor_gps_sub{ORB_ID(sensor_gps)};
+	sensor_gps_s			_sensor_gps{};
+
+	uORB::Subscription		_target_uav_info_sub{ORB_ID(target_uav_info)};
+	target_uav_info_s		_target_uav_info{};
+
+	InterceptGuidance 	_intercept_guidance;
+	TargetUavPredictor	_target_uav_predictor;
+	MapProjection 		_map_projection;
+
+	Vector3d 	_target_last_position_global;
+	Vector3f 	_target_last_position_ned;
+
+	Eulerf 		_target_last_attitude;
+	float 		_target_last_velocity;
+	uint64_t	_target_last_seen;
+
+	Vector3f	_target_est_delta_position_ned{};
+	Vector3f	_target_position_est_ned{};
+
+	Vector3f	_vehicle_position_ned{};
+
+	hrt_abstime	_ned_ref_timestamp{0};
+
 };

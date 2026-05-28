@@ -44,38 +44,55 @@ bool FlightTaskIntercept::activate(const trajectory_setpoint_s &last_setpoint)
 
 bool FlightTaskIntercept::update()
 {
-	bool ret = FlightTask::update();
+	_vehicle_local_position_sub.update(&_vehicle_local_position);
+	_vehicle_position_ned = Vector3f(_vehicle_local_position.x,
+					_vehicle_local_position.y,
+					_vehicle_local_position.z);
 
-	if (PX4_ISFINITE(_velocity(2))) {
-		// land with landspeed
-		_velocity_setpoint(2) = _param_mpc_land_speed.get();
-		_acceleration_setpoint(2) = NAN;
 
-	} else {
-		// descend with constant acceleration (crash landing)
-		_velocity_setpoint(2) = NAN;
-		_acceleration_setpoint(2) = .3f;
+	if (_vehicle_local_position.ref_timestamp != _ned_ref_timestamp) {
+		_map_projection.initReference(_vehicle_local_position.ref_lat,
+						_vehicle_local_position.ref_lon);
+
+		_ned_ref_timestamp = _vehicle_local_position.ref_timestamp;
 	}
 
-	// Nudging
-	if (_param_mpc_land_rc_help.get() && _sticks.checkAndUpdateStickInputs()) {
-		_stick_yaw.generateYawSetpoint(_yawspeed_setpoint, _yaw_setpoint, _sticks.getYawExpo(), _yaw, _deltatime);
-		_acceleration_setpoint.xy() = _stick_tilt_xy.generateAccelerationSetpoints(_sticks.getPitchRoll(), _deltatime, _yaw,
-					      _yaw_setpoint);
 
-		// Stick full up -1 -> stop, stick full down 1 -> double the value
-		_velocity_setpoint(2) *= (1 - _sticks.getThrottleZeroCenteredExpo());
-		_acceleration_setpoint(2) -= _sticks.getThrottleZeroCentered() * 10.f;
+	if (_target_uav_info_sub.updated()) {
 
-	} else {
-		_acceleration_setpoint.xy() = matrix::Vector2f(0.f, 0.f); // stay level to minimize horizontal drift
-		_yawspeed_setpoint = NAN;
+		_target_uav_info_sub.update(&_target_uav_info);
 
-		// keep heading
-		if (!PX4_ISFINITE(_yaw_setpoint)) {
-			_yaw_setpoint = _yaw;
-		}
+
+		_target_last_position_global = Vector3d(_target_uav_info.latitude,
+						_target_uav_info.longitude,
+						_target_uav_info.altitude);
+
+		_map_projection.project(_target_last_position_global(0), _target_last_position_global(1),
+				_target_last_position_ned(0), _target_last_position_ned(1));
+		_target_last_position_ned(2) = -((float)_target_last_position_global(2) - _vehicle_local_position.ref_alt);
+
+		_target_last_attitude 	= Eulerf(math::radians(_target_uav_info.roll),
+						math::radians(_target_uav_info.pitch),
+						math::radians(_target_uav_info.heading));
+
+		_target_last_velocity	= _target_uav_info.velocity;
+
+		_target_last_seen	= _target_uav_info.time_utc_usec;
+
+		_target_uav_predictor.assignTargetInfo(_target_last_position_ned,
+							_target_last_attitude,
+							_target_last_velocity,
+							_target_last_seen);
 	}
 
-	return ret;
+	if (_sensor_gps_sub.updated()) {
+		_sensor_gps_sub.update(&_sensor_gps);
+	}
+
+	_target_est_delta_position_ned = _target_uav_predictor.estimateTargetPosDelta(_sensor_gps.time_utc_usec);
+	_target_position_est_ned = _target_last_position_ned + _target_est_delta_position_ned;
+
+	_position_setpoint = _intercept_guidance.calculateSetpoint(_vehicle_position_ned, _target_position_est_ned);
+
+	return true;
 }

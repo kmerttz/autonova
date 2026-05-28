@@ -31,9 +31,10 @@
 #
 ############################################################################
 
-px4_add_library(FlightTaskDescend
-	FlightTaskDescend.cpp
+px4_add_library(FlightTaskIntercept
+	FlightTaskIntercept.cpp
+	FlightTaskIntercept.hpp
 )
 
-target_link_libraries(FlightTaskDescend PUBLIC FlightTask FlightTaskUtility StickYaw)
-target_include_directories(FlightTaskDescend PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(FlightTaskIntercept PUBLIC FlightTask intercept_guidance target_uav_predictor)
+target_include_directories(FlightTaskIntercept PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
