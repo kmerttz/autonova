@@ -371,3 +371,10 @@ then
 	nova_kamikaze start
 	nova_kamikaze_apr start
 fi
+
+
+if param compare -s NOVA_INTRCPT_EN 1
+then
+	vehicle_info_sender start
+	nova_intercept start
+fi
