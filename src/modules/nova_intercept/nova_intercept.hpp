@@ -122,7 +122,8 @@ private:
 
 	// Parameters
 	DEFINE_PARAMETERS(
-		(ParamFloat<px4::params::INTRCPT_LAG_DIST>) _param_intrcpt_lag_dist
+		(ParamFloat<px4::params::INTRCPT_LAG_DIST>) _param_intrcpt_lag_dist,
+		(ParamInt<px4::params::NOVA_INTRCPT_EN>) _param_nova_intrcpt_en
 	)
 
 	TargetUavPredictor	_target_uav_predictor;
