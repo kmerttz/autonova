@@ -1,9 +1,10 @@
 /**
- * Id of the current team on Teknofest.
+ * Id of the current team.
  *
  *
  *
  * @min 0
- * @group Vehicle
+ * @max 128
+ * @group NOVA
  */
 PARAM_DEFINE_INT32(TEAM_ID, 70);

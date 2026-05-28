@@ -48,7 +48,6 @@ VehicleInfoSender::~VehicleInfoSender()
 bool VehicleInfoSender::init()
 {
 	ScheduleOnInterval(1_s);
-
 	return true;
 }
 
@@ -63,59 +62,44 @@ void VehicleInfoSender::Run()
 	perf_begin(_loop_perf);
 	perf_count(_loop_interval_perf);
 
-	// Check if parameters have changed
 	if (_parameter_update_sub.updated()) {
-		// clear update
 		parameter_update_s param_update;
 		_parameter_update_sub.copy(&param_update);
-		updateParams(); // update module parameters (in DEFINE_PARAMETERS)
+		updateParams();
 	}
 
+	_vehicle_global_position_sub.update(&_vehicle_global_position);
+	_vehicle_attitude_sub.update(&_vehicle_attitude);
+	_vehicle_local_position_sub.update(&_vehicle_local_position);
+	_sensor_gps_sub.update(&_sensor_gps);
 
-	vehicle_global_position_s global_pos;
-	vehicle_attitude_s attitude;
-	vehicle_local_position_s local_pos;
-#ifdef __PX4_NUTTX
-	sensor_gps_s sensor_gps;
-#endif
-	vehicle_info_s vehicle_info{};
+	_vehicle_info.timestamp = hrt_absolute_time();
 
-	_vehicle_global_position_sub.update(&global_pos);
-	_vehicle_attitude_sub.update(&attitude);
-	_vehicle_local_position_sub.update(&local_pos);
-#ifdef __PX4_NUTTX
-	_sensor_gps_sub.update(&sensor_gps);
-#endif
+	_vehicle_info.team_id = _param_team_id.get();
 
-	vehicle_info.timestamp = hrt_absolute_time();
+	_vehicle_info.latitude = _vehicle_global_position.lat;
+	_vehicle_info.longitude = _vehicle_global_position.lon;
+	_vehicle_info.altitude = _vehicle_global_position.alt;
 
-	vehicle_info.team_id = _param_team_id.get();
+	matrix::Eulerf euler(matrix::Quatf(_vehicle_attitude.q));
 
-	vehicle_info.latitude = global_pos.lat;
-	vehicle_info.longitude = global_pos.lon;
-	vehicle_info.altitude = global_pos.alt;
+	_vehicle_info.roll = math::degrees(euler.phi());
+	_vehicle_info.pitch = math::degrees(euler.theta());
+	_vehicle_info.heading = math::degrees(euler.psi());
 
-	matrix::Eulerf euler(matrix::Quatf(attitude.q));
-
-	vehicle_info.roll = euler.phi() * (180.0f / M_PI_F);
-	vehicle_info.pitch = euler.theta() * (180.0f / M_PI_F);
-	vehicle_info.heading = euler.psi() * (180.0f / M_PI_F);
-
-	vehicle_info.velocity = sqrtf((local_pos.vx * local_pos.vx) +
-                                (local_pos.vy * local_pos.vy) +
-                                (local_pos.vz * local_pos.vz));
+	_vehicle_info.velocity = sqrtf((_vehicle_local_position.vx * _vehicle_local_position.vx) +
+                                (_vehicle_local_position.vy * _vehicle_local_position.vy) +
+                                (_vehicle_local_position.vz * _vehicle_local_position.vz));
 
 #ifdef __PX4_NUTTX
 	vehicle_info.time_utc_usec = sensor_gps.time_utc_usec;
 #else
 	auto timenow = std::chrono::system_clock::now();
 	auto timenow_usec = std::chrono::duration_cast<std::chrono::microseconds>(timenow.time_since_epoch()).count();
-	vehicle_info.time_utc_usec = timenow_usec;
-#endif
+	_vehicle_info.time_utc_usec = timenow_usec;
+#endif //__PX4_NUTTX
 
-	_vehicle_info_pub.publish(vehicle_info);
-
-
+	_vehicle_info_pub.publish(_vehicle_info);
 	perf_end(_loop_perf);
 }
 

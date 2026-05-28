@@ -41,6 +41,7 @@
 
 #include <drivers/drv_hrt.h>
 #include <lib/perf/perf_counter.h>
+#include <lib/matrix/matrix/math.hpp>
 
 #include <uORB/Publication.hpp>
 #include <uORB/Subscription.hpp>
@@ -50,14 +51,13 @@
 #include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_local_position.h>
-#include <uORB/topics/vehicle_info.h>
-#include <lib/matrix/matrix/math.hpp>
-
-#ifdef __PX4_NUTTX
 #include <uORB/topics/sensor_gps.h>
-#else
+
+#include <uORB/topics/vehicle_info.h>
+
+#ifndef __PX4_NUTTX
 #include <chrono>
-#endif
+#endif // __PX4_NUTTX
 
 using namespace time_literals;
 
@@ -90,10 +90,15 @@ private:
 	uORB::Subscription          _vehicle_global_position_sub{ORB_ID(vehicle_global_position)};
 	uORB::Subscription          _vehicle_attitude_sub{ORB_ID(vehicle_attitude)};
 	uORB::Subscription          _vehicle_local_position_sub{ORB_ID(vehicle_local_position)};
-#ifdef __PX4_NUTTX
 	uORB::Subscription          _sensor_gps_sub{ORB_ID(sensor_gps)};
-#endif
+
 	uORB::SubscriptionInterval  _parameter_update_sub{ORB_ID(parameter_update), 1_s};
+
+	vehicle_info_s			_vehicle_info{};
+	vehicle_global_position_s	_vehicle_global_position{};
+	vehicle_local_position_s	_vehicle_local_position{};
+	vehicle_attitude_s		_vehicle_attitude{};
+	sensor_gps_s			_sensor_gps{};
 
 	// Performance (perf) counters
 	perf_counter_t	_loop_perf{perf_alloc(PC_ELAPSED, MODULE_NAME": cycle")};
@@ -103,6 +108,4 @@ private:
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::TEAM_ID>) _param_team_id
 	)
-
-	bool _armed{false};
 };
