@@ -56,6 +56,7 @@ void NovaIntercept::ConfigureInterceptMode(int8_t mode_id)
 	vehicle_control_mode.flag_control_attitude_enabled = true;
 	vehicle_control_mode.flag_control_rates_enabled = true;
 	vehicle_control_mode.flag_control_allocation_enabled = true;
+	vehicle_control_mode.flag_control_offboard_enabled = true;
 
 	vehicle_control_mode.flag_control_termination_enabled = false;
 
@@ -147,13 +148,28 @@ void NovaIntercept::PopulatePositionSetpoint()
 	Vector3f position_setpoint = _intercept_guidance.calculateSetpoint(_vehicle_position_ned, target_position_est_ned, _lag_distance);
 
 
-	_vehicle_local_position_setpoint.timestamp = hrt_absolute_time();
+	_trajectory_setpoint.timestamp = hrt_absolute_time();
 
-	_vehicle_local_position_setpoint.x = position_setpoint(0);
-	_vehicle_local_position_setpoint.y = position_setpoint(1);
-	_vehicle_local_position_setpoint.z = position_setpoint(2);
+	_trajectory_setpoint.position[0] = position_setpoint(0);
+	_trajectory_setpoint.position[1] = position_setpoint(1);
+	_trajectory_setpoint.position[2] = position_setpoint(2);
 
-	_vehicle_local_position_setpoint_pub.publish(_vehicle_local_position_setpoint);
+	_trajectory_setpoint.velocity[0] = NAN;
+	_trajectory_setpoint.velocity[1] = NAN;
+	_trajectory_setpoint.velocity[2] = NAN;
+
+	_trajectory_setpoint.acceleration[0] = NAN;
+	_trajectory_setpoint.acceleration[1] = NAN;
+	_trajectory_setpoint.acceleration[2] = NAN;
+
+	_trajectory_setpoint.jerk[0] = NAN;
+	_trajectory_setpoint.jerk[1] = NAN;
+	_trajectory_setpoint.jerk[2] = NAN;
+
+	_trajectory_setpoint.yaw = NAN;
+	_trajectory_setpoint.yawspeed = NAN;
+
+	_trajectory_setpoint_pub.publish(_trajectory_setpoint);
 }
 
 bool NovaIntercept::init()

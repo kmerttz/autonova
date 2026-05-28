@@ -20,7 +20,8 @@
 
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/vehicle_local_position.h>
-#include <uORB/topics/vehicle_local_position_setpoint.h>
+//#include <uORB/topics/vehicle_local_position_setpoint.h>
+#include <uORB/topics/trajectory_setpoint.h>
 #include <uORB/topics/target_uav_info.h>
 #include <uORB/topics/sensor_gps.h>
 
@@ -68,7 +69,8 @@ private:
 	void PopulatePositionSetpoint();
 
 	// Publications
-	uORB::Publication<vehicle_local_position_setpoint_s> 	_vehicle_local_position_setpoint_pub{ORB_ID(vehicle_local_position_setpoint)};
+	//uORB::Publication<vehicle_local_position_setpoint_s> 	_vehicle_local_position_setpoint_pub{ORB_ID(vehicle_local_position_setpoint)};
+	uORB::Publication<trajectory_setpoint_s> 	        _trajectory_setpoint_pub{ORB_ID(trajectory_setpoint)};
 
 	uORB::Publication<register_ext_component_request_s> 	_register_ext_component_request_pub{ORB_ID(register_ext_component_request)};
 	uORB::Publication<unregister_ext_component_s> 		_unregister_ext_component_pub{ORB_ID(unregister_ext_component)};
@@ -105,7 +107,8 @@ private:
 
 	vehicle_status_s 			_vehicle_status{};
 	vehicle_local_position_s		_vehicle_local_position{};
-	vehicle_local_position_setpoint_s	_vehicle_local_position_setpoint{};
+	//vehicle_local_position_setpoint_s	_vehicle_local_position_setpoint{};
+	trajectory_setpoint_s			_trajectory_setpoint{};
 	target_uav_info_s			_target_uav_info{};
 	sensor_gps_s				_sensor_gps{};
 
